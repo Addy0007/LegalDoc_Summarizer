@@ -1,1 +1,148 @@
-hello
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Legal Document Summarizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: url('https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1740&q=80') no-repeat center center/cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-box {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 20px;
+  padding: 40px 30px;
+  width: 90%;
+  max-width: 600px;
+  color: #fff;
+  box-shadow:
+    0 0 30px rgba(255, 255, 255, 0.12),
+    0 0 80px rgba(173, 216, 230, 0.3),
+    0 0 120px rgba(173, 216, 230, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 28px;
+      color: #ffffff;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: 600;
+      color: #eee;
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: #6366f1;
+      color: #fff;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 15px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+    }
+
+    button:hover {
+      background-color: #4f46e5;
+    }
+
+    #output {
+      margin-top: 25px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      min-height: 80px;
+      color: #f1f1f1;
+      white-space: pre-wrap;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    @media (max-width: 600px) {
+      .glass-box {
+        padding: 25px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="glass-box">
+    <h1>Legal Document Summarizer</h1>
+
+    <div class="form-group">
+      <label for="file-input">Upload a <strong>Document</strong>:</label>
+      <input type="file" id="file-input" accept=".txt" />
+    </div>
+
+    <button onclick="summarize()">Summarize</button>
+
+    <div id="output"></div>
+  </div>
+
+  <script>
+    async function summarize() {
+      const file = document.getElementById('file-input').files[0];
+      const output = document.getElementById('output');
+
+      if (!file) {
+        output.innerText = "⚠️ Please upload a document.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("http://localhost:5000/summarize", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        output.innerText = data.summary || `❌ Error: ${data.error}`;
+      } catch (err) {
+        console.error("Fetch error:", err);
+        output.innerText = "❌ Failed to connect to the server.";
+      }
+    }
+  </script>
+</body>
+</html>
