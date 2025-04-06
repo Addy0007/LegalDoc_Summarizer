@@ -23,21 +23,20 @@
     }
 
     .glass-box {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-radius: 20px;
-  padding: 40px 30px;
-  width: 90%;
-  max-width: 600px;
-  color: #fff;
-  box-shadow:
-    0 0 30px rgba(255, 255, 255, 0.12),
-    0 0 80px rgba(173, 216, 230, 0.3),
-    0 0 120px rgba(173, 216, 230, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 20px;
+      padding: 40px 30px;
+      width: 90%;
+      max-width: 600px;
+      color: #fff;
+      box-shadow:
+        0 0 30px rgba(255, 255, 255, 0.12),
+        0 0 80px rgba(173, 216, 230, 0.3),
+        0 0 120px rgba(173, 216, 230, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
 
     h1 {
       text-align: center;
@@ -71,7 +70,7 @@
     button {
       background-color: #6366f1;
       color: #fff;
-      padding: 8px 20px;
+      padding: 10px 25px;
       border: none;
       border-radius: 15px;
       font-size: 16px;
@@ -90,10 +89,13 @@
       padding: 15px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 10px;
-      min-height: 80px;
+      min-height: 120px;
+      max-height: 300px;
+      overflow-y: auto;
       color: #f1f1f1;
       white-space: pre-wrap;
       border: 1px solid rgba(255, 255, 255, 0.2);
+      line-height: 1.5;
     }
 
     @media (max-width: 600px) {
@@ -109,40 +111,52 @@
 
     <div class="form-group">
       <label for="file-input">Upload a <strong>Document</strong>:</label>
-      <input type="file" id="file-input" accept=".txt" />
+      <input type="file" id="file-input" accept=".pdf" />
     </div>
 
     <button onclick="summarize()">Summarize</button>
 
-    <div id="output"></div>
+    <div id="output">No summary yet.</div>
   </div>
 
   <script>
     async function summarize() {
-      const file = document.getElementById('file-input').files[0];
+      const fileInput = document.getElementById('file-input');
+      const file = fileInput.files[0];
       const output = document.getElementById('output');
-
+  
       if (!file) {
         output.innerText = "⚠️ Please upload a document.";
         return;
       }
-
+  
+      output.innerText = "⏳ Summarizing... Please wait.";
+      console.log("📤 Uploading file:", file.name);
+  
       const formData = new FormData();
       formData.append("file", file);
-
+  
       try {
-        const res = await fetch("http://localhost:5000/summarize", {
+        const res = await fetch("/summarize", {
           method: "POST",
-          body: formData
+          body: formData,
         });
-
+  
+        console.log("📥 Response received:", res);
+  
         const data = await res.json();
-        output.innerText = data.summary || `❌ Error: ${data.error}`;
+        console.log("✅ JSON from backend:", data);
+  
+        if (res.ok && data.summary) {
+          output.innerText = data.summary;
+        } else {
+          output.innerText = `❌ Error: ${data.error || "Something went wrong."}`;
+        }
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.error("❌ Fetch error:", err);
         output.innerText = "❌ Failed to connect to the server.";
       }
     }
-  </script>
+  </script>      
 </body>
 </html>
